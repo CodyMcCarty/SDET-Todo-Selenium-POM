@@ -17,6 +17,20 @@ public class CRUDTodoTest {
   WebDriver driver;
   HomePage home;
 
+  @Before
+  public void setup() {
+    WebDriverManager.chromedriver().setup();
+    driver = new ChromeDriver();
+    home = new HomePage(driver);
+    home.generateStarterTodos(5);
+    driver.navigate().refresh();
+  }
+
+  @After
+  public void onTearDown() {
+    driver.close();
+  }
+
   @AfterClass
   public static void tearDownClass() {
     WebDriverManager.chromedriver().setup();
@@ -24,19 +38,6 @@ public class CRUDTodoTest {
     HomePage home = new HomePage(driver);
     home.deleteTodos();
     driver.quit();
-  }
-
-  @Before
-  public void setup() {
-    WebDriverManager.chromedriver().setup();
-    driver = new ChromeDriver();
-    home = new HomePage(driver);
-    home.generateStarterTodos(5);
-  }
-
-  @After
-  public void onTearDown() {
-    driver.close();
   }
 
   /* 1) GIVEN I am at the todoPage

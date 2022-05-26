@@ -50,7 +50,7 @@ public class HomePage extends LoadableComponent<HomePage> {
   public WebElement getTodo(String contains) {
     try {
       waitForElement(todos);
-      return todos.stream() // FIXME: add a wait
+      return todos.stream()
           .filter((e) -> e.getText().contains(contains))
           .findFirst()
           .orElseThrow(
@@ -82,7 +82,7 @@ public class HomePage extends LoadableComponent<HomePage> {
       wait.until(ExpectedConditions.visibilityOf(element));
     } catch (Exception e) {
       driver.navigate().refresh();
-      wait.until(ExpectedConditions.visibilityOf(element));
+      waitForElement();
     }
   }
 
@@ -91,7 +91,7 @@ public class HomePage extends LoadableComponent<HomePage> {
       wait.until(ExpectedConditions.visibilityOfAllElements(elements));
     } catch (Exception e) {
       driver.navigate().refresh();
-      wait.until(ExpectedConditions.visibilityOfAllElements(elements));
+      waitForElement();
     }
   }
 
@@ -100,7 +100,10 @@ public class HomePage extends LoadableComponent<HomePage> {
       wait.until(ExpectedConditions.visibilityOf(todoInput));
     } catch (Exception e) {
       driver.navigate().refresh();
-      wait.until(ExpectedConditions.visibilityOf(todoInput));
+      try {
+        Thread.sleep(5000);
+      } catch (Exception e2) {
+      }
     }
   }
 
@@ -153,17 +156,24 @@ public class HomePage extends LoadableComponent<HomePage> {
 
 
   public void deleteTodos() {
-    driver.navigate().refresh();
-    waitForElement(firstTodo);
-    List<WebElement> todos = getUpdatedTodos();
-    for (int i = 0; i < todos.size() + 5; i++) {
+    int size = getUpdatedTodos().size();
+    while (getUpdatedTodos().size() > 0) {
       try {
-      getUpdatedTodos();
-      WebElement todo = findFirstTodo();
-      deleteTodo(todo);
-      driver.navigate().refresh();
+        size = getUpdatedTodos().size();
+        WebElement todo = findFirstTodo();
+        deleteTodo(todo);
       } catch (Exception e) {
-        break;
+        driver.navigate().refresh();
+        size = getUpdatedTodos().size();
+      }
+      try {
+        WebElement markedTodo = firstTodo;
+        if (markedTodo.getAttribute("class").equals("todo completed")) {
+          action.moveToElement(markedTodo).moveToElement(
+                  driver.findElement(By.cssSelector("#todo-list > li:nth-child(1) > div > .toggle")))
+              .click().build().perform();
+        }
+      } catch (Exception e) {
       }
     }
   }
