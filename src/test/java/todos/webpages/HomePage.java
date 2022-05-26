@@ -22,6 +22,7 @@ public class HomePage extends LoadableComponent<HomePage> {
   private WebDriver driver;
   private WebDriverWait wait;
   private Actions action;
+
   @FindBy(id = "add-todo")
   private WebElement todoInput;
 
@@ -36,7 +37,7 @@ public class HomePage extends LoadableComponent<HomePage> {
     this.driver = driver;
     driver.get(PAGE_URL);
     PageFactory.initElements(driver, this);
-    wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    wait = new WebDriverWait(driver, Duration.ofSeconds(5));
     action = new Actions(driver);
     isLoaded();
   }
@@ -77,15 +78,30 @@ public class HomePage extends LoadableComponent<HomePage> {
   }
 
   public void waitForElement(WebElement element) {
-    wait.until(ExpectedConditions.visibilityOf(element));
+    try {
+      wait.until(ExpectedConditions.visibilityOf(element));
+    } catch (Exception e) {
+      driver.navigate().refresh();
+      wait.until(ExpectedConditions.visibilityOf(element));
+    }
   }
 
   public void waitForElement(List<WebElement> elements) {
-    wait.until(ExpectedConditions.visibilityOfAllElements(elements));
+    try {
+      wait.until(ExpectedConditions.visibilityOfAllElements(elements));
+    } catch (Exception e) {
+      driver.navigate().refresh();
+      wait.until(ExpectedConditions.visibilityOfAllElements(elements));
+    }
   }
 
   public void waitForElement() {
-    wait.until(ExpectedConditions.visibilityOf(todoInput));
+    try {
+      wait.until(ExpectedConditions.visibilityOf(todoInput));
+    } catch (Exception e) {
+      driver.navigate().refresh();
+      wait.until(ExpectedConditions.visibilityOf(todoInput));
+    }
   }
 
   public String generateTodo() {
@@ -138,12 +154,17 @@ public class HomePage extends LoadableComponent<HomePage> {
 
   public void deleteTodos() {
     driver.navigate().refresh();
+    waitForElement(firstTodo);
     List<WebElement> todos = getUpdatedTodos();
     for (int i = 0; i < todos.size() + 5; i++) {
-      driver.navigate().refresh();
+      try {
       getUpdatedTodos();
       WebElement todo = findFirstTodo();
       deleteTodo(todo);
+      driver.navigate().refresh();
+      } catch (Exception e) {
+        break;
+      }
     }
   }
 

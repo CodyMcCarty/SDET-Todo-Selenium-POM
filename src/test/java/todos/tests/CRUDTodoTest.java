@@ -36,7 +36,7 @@ public class CRUDTodoTest {
 
   @After
   public void onTearDown() {
-    driver.quit();
+    driver.close();
   }
 
   /* 1) GIVEN I am at the todoPage
